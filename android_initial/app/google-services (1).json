@@ -1,0 +1,191 @@
+{
+  "project_info": {
+    "project_number": "12778704235",
+    "firebase_url": "https://edtech02-14e2c-default-rtdb.firebaseio.com",
+    "project_id": "edtech02-14e2c",
+    "storage_bucket": "edtech02-14e2c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12778704235:android:a366f7cffac1b93af0102e",
+        "android_client_info": {
+          "package_name": "com.digontom.viewedtech"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "12778704235-39rgblfp33t2ae8ub29ti987ijff348k.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.digontom.viewedtech",
+            "certificate_hash": "2ab16bd89057e72b71ad883fe6074a506dade128"
+          }
+        },
+        {
+          "client_id": "12778704235-b67jsb390pdgo3or9e4v73nja25mjqk0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.digontom.viewedtech",
+            "certificate_hash": "a951381d8097cf5ccdf5ff19f4b8ffd86c3f8c29"
+          }
+        },
+        {
+          "client_id": "12778704235-pgreuk33eqcrlntmacti7fjbkid9prmg.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.digontom.viewedtech",
+            "certificate_hash": "bb882729ddce64bb4fdbde891c8f72e322c1023c"
+          }
+        },
+        {
+          "client_id": "12778704235-cmjthnog79r45msc6buj03gbdotp1p2b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGML5RUr6zY0D_NS_kPvsLufaEKk-8520"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "12778704235-cmjthnog79r45msc6buj03gbdotp1p2b.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "12778704235-6neoildk08a1nh1veolhrfkttbdfegh4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sangvaleap.onlinecourse"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12778704235:android:9a3cffc144a84d8af0102e",
+        "android_client_info": {
+          "package_name": "com.examplan.b"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "12778704235-jnb4bcv43mpuqvtfvlkpspq7g08l7ap9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.examplan.b",
+            "certificate_hash": "2ab16bd89057e72b71ad883fe6074a506dade128"
+          }
+        },
+        {
+          "client_id": "12778704235-sgd6b0ledqhsf5f34gsqe16d299sb1sb.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.examplan.b",
+            "certificate_hash": "e5870fc7daad7a7c9faad3ab922efc099e199d03"
+          }
+        },
+        {
+          "client_id": "12778704235-tmdralbkpp5kcf490obac7tf7e9m2pg0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.examplan.b",
+            "certificate_hash": "bb882729ddce64bb4fdbde891c8f72e322c1023c"
+          }
+        },
+        {
+          "client_id": "12778704235-cmjthnog79r45msc6buj03gbdotp1p2b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGML5RUr6zY0D_NS_kPvsLufaEKk-8520"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "12778704235-cmjthnog79r45msc6buj03gbdotp1p2b.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "12778704235-6neoildk08a1nh1veolhrfkttbdfegh4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sangvaleap.onlinecourse"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:12778704235:android:97657d9a4632c3b0f0102e",
+        "android_client_info": {
+          "package_name": "com.sangvaleap.online_course"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "12778704235-5i4igabv2mj1sc2lrs6ju6q3j28ik6t7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sangvaleap.online_course",
+            "certificate_hash": "bb882729ddce64bb4fdbde891c8f72e322c1023c"
+          }
+        },
+        {
+          "client_id": "12778704235-7k9bh240fqeltm65pgb1selk64cb7a2b.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sangvaleap.online_course",
+            "certificate_hash": "2ab16bd89057e72b71ad883fe6074a506dade128"
+          }
+        },
+        {
+          "client_id": "12778704235-cdkf2s0i8bdgo6fe8mtic3nnmrsp1ik7.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.sangvaleap.online_course",
+            "certificate_hash": "a951381d8097cf5ccdf5ff19f4b8ffd86c3f8c29"
+          }
+        },
+        {
+          "client_id": "12778704235-cmjthnog79r45msc6buj03gbdotp1p2b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCGML5RUr6zY0D_NS_kPvsLufaEKk-8520"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "12778704235-cmjthnog79r45msc6buj03gbdotp1p2b.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "12778704235-6neoildk08a1nh1veolhrfkttbdfegh4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.sangvaleap.onlinecourse"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
