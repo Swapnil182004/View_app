@@ -11,22 +11,22 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 // ─── DESIGN TOKENS ──────────────────────────────────────────────────────────
 
 class _Clr {
-  static const primary    = Color(0xFF1A56DB); // Enthusiastic Green
-  static const dark       = Color(0xFF087A54); // Deep Green
-  static const mid        = Color(0xFF0A8B5F); // Mid Green
-  static const medium     = Color(0xFF0C9568); // Medium Green
-  static const light      = Color(0xFF34C48E); // Soft Green
-  static const lighter    = Color(0xFF5ADAA8); // Lighter Green
+  static const primary    = Color(0xFF1E40AF); // Primary Blue
+  static const dark       = Color(0xFF1E3A8A); // Dark Blue
+  static const mid        = Color(0xFF2563EB); // Mid Blue
+  static const medium     = Color(0xFF3B82F6); // Medium Blue
+  static const light      = Color(0xFF60A5FA); // Light Blue
+  static const lighter    = Color(0xFF93C5FD); // Lighter Blue
   static const scaffoldBg = Color(0xFFF8F9FA); // Very light off-white
-  static const surfaceEgg = Color(0xFFE6F7F0); // Green tint light surface
+  static const surfaceEgg = Color(0xFFEFF6FF); // Blue tint light surface
   static const cardWhite  = Color(0xFFFFFFFF); // Pure White
-  static const border     = Color(0xFFCCD8D4); // Green tint border
+  static const border     = Color(0xFFDBEAFE); // Blue tint border
   static const gold       = Colors.white; // Secondary White
-  static const goldDark   = Color(0xFFE07800);
-  static const red        = Color(0xFFE53935);
+  static const goldDark   = Color(0xFF1E40AF);
+  static const red        = Color(0xFFEF4444);
   static const orange     = Color(0xFF2563EB);
-  static const teal       = Color(0xFF00796B);
-  static const ink        = Color(0xFF0D1F12);
+  static const teal       = Color(0xFF3B82F6);
+  static const ink        = Color(0xFF111827);
   static const inkMid     = Color(0xFF374151);
   static const inkLight   = Color(0xFF6B7280);
 }
@@ -37,7 +37,7 @@ const _kThemeGrad = LinearGradient(
 );
 const _kThemeGradLight = LinearGradient(
   begin: Alignment.topLeft, end: Alignment.bottomRight,
-  colors: [Color(0xFF234BBA), Color(0xFF4270ED)], // Match _Clr.mid & _Clr.light hexes
+  colors: [Color(0xFF1E40AF), Color(0xFF3B82F6)], // Blue gradients
 );
 
 List<BoxShadow> _themeShadow({double blur = 20, double opacity = 0.18}) => [
