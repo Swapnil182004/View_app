@@ -53,7 +53,7 @@ class _ChatSearchBlockState extends State<ChatSearchBlock> {
             fontWeight: FontWeight.w400,
           ),
           decoration: InputDecoration(
-            hintText: "Search question sets",
+            hintText: "Search with subject name",
             hintStyle: TextStyle(
               color: Colors.grey.shade500,
               fontSize: 15,

@@ -240,6 +240,7 @@ class QuizResultPage extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(24), // Pill-shaped
                   ),
+                  elevation: 3.0,
                 ),
               ),
             ),
@@ -256,6 +257,7 @@ class QuizResultPage extends StatelessWidget {
                     icon: const Icon(Icons.replay),
                     label: const Text('Retake Quiz'),
                     style: OutlinedButton.styleFrom(
+                      foregroundColor: Color(0xFF2563EB),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -275,6 +277,7 @@ class QuizResultPage extends StatelessWidget {
                     icon: const Icon(Icons.home),
                     label: const Text('Home'),
                     style: OutlinedButton.styleFrom(
+                      foregroundColor: Color(0xFF2563EB),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
@@ -302,9 +305,9 @@ class QuizResultPage extends StatelessWidget {
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24), // Pill-shaped
+                    borderRadius: BorderRadius.circular(24),
                   ),
-                  elevation: 0,
+                  elevation: 3.0,
                 ),
               ),
             ),

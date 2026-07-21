@@ -1,14 +1,14 @@
 import 'dart:convert';
-
-import 'package:bottom_sheet/bottom_sheet.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:bottom_sheet/bottom_sheet.dart';
+import 'package:http/http.dart' as http;
+import 'package:rive/rive.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:online_course/core/services/payment_service.dart';
 import 'package:online_course/src/features/course/data/datasources/account_courses_list.dart';
 import 'package:online_course/src/features/course/data/models/section.model.dart';
 import 'package:online_course/src/features/course/domain/entities/course.dart';
-import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'package:rive/rive.dart';
-import 'package:http/http.dart' as http;
 
 class CourseDetailBottomBlock extends StatefulWidget {
   const CourseDetailBottomBlock({
@@ -26,7 +26,7 @@ class CourseDetailBottomBlock extends StatefulWidget {
 }
 
 class _CourseDetailBottomBlockState extends State<CourseDetailBottomBlock> {
-  late Razorpay _razorpay;
+  final PaymentService _paymentService = PaymentService();
 
   Map<int, String> pricing = {};
   List<String> selectedForPayment = [];
@@ -35,16 +35,17 @@ class _CourseDetailBottomBlockState extends State<CourseDetailBottomBlock> {
   @override
   void initState() {
     super.initState();
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    _paymentService.init(
+      onSuccess: _handlePaymentSuccess,
+      onFailure: _handlePaymentError,
+      onExternalWallet: _handleExternalWallet,
+    );
   }
 
   @override
   void dispose() {
+    _paymentService.dispose();
     super.dispose();
-    _razorpay.clear();
   }
 
   void openCheckout(String? pricee) async {
@@ -53,63 +54,31 @@ class _CourseDetailBottomBlockState extends State<CourseDetailBottomBlock> {
     }
 
     int price = int.parse(pricee.toString());
-    String? orderId = await createRazorpayOrder(price);
+    setState(() => _isProcessing = true);
+    String? orderId = await _paymentService.createOrder(price);
 
     if (orderId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Error: unable to create order'),
-          backgroundColor: const Color(0xFFE67E22), // ✅ Orange error
-        ),
-      );
+      setState(() => _isProcessing = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error: unable to create order'),
+            backgroundColor: Color(0xFFE67E22), // ✅ Orange error
+          ),
+        );
+      }
       return;
     }
 
-    var options = {
-      'key': 'rzp_live_q05lvifSYOtDJ7',
-      'order_id': orderId,
-      'amount': price * 100,
-      'name': 'Examplan B',
-      'image': 'assets/images/examplan_b_logo.png',
-      'description': 'Online Course',
-      'theme': {'color': '#305CDE'} // ✅ Emerald Green
-    };
-
     try {
-      _razorpay.open(options);
-    } catch (e) {
-      debugPrint('Error: e');
-    }
-  }
-
-  Future<String?> createRazorpayOrder(int amount) async {
-    try {
-      var headersList = {
-        'Accept': '*/*',
-        'User-Agent': 'Flutter Client',
-        'Content-Type': 'application/json'
-      };
-
-      var body = json.encode({"amount": amount, "currency": "INR"});
-
-      var response = await http.post(
-        Uri.parse('https://createrazorpayorder-ebwzua76iq-uc.a.run.app'),
-        headers: headersList,
-        body: body,
+      await _paymentService.openCheckout(
+        name: 'Examplan B',
+        description: 'Online Course',
+        amount: price,
+        orderId: orderId,
       );
-
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        var responseData = json.decode(response.body);
-        var orderId = responseData['order']['id'];
-        print("Order ID: $orderId");
-        return orderId;
-      } else {
-        print("Error: ${response.reasonPhrase}");
-        return null;
-      }
     } catch (e) {
-      print("Error: $e");
-      return null;
+      setState(() => _isProcessing = false);
     }
   }
 

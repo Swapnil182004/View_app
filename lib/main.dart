@@ -3,18 +3,16 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:no_screenshot/no_screenshot.dart';
 import 'package:online_course/core/services/injection_container.dart';
 import 'package:online_course/firebase_options.dart';
 import 'package:online_course/src/features/course/pesentation/bloc/explore/course_bloc.dart';
 import 'package:online_course/src/features/course/pesentation/bloc/favorite_course/favorite_course_bloc.dart';
 import 'package:online_course/src/features/course/pesentation/bloc/feature/feature_course_bloc.dart';
 import 'package:online_course/src/features/course/pesentation/bloc/recommend/recommend_course_bloc.dart';
-import 'package:online_course/src/features/onboarding/presentation/onboarding_screen.dart';
-
 // ✅ IMPORT THE NEW AUTH GATE
 import 'package:online_course/src/features/login/presentation/auth_gate.dart';
-
-import 'package:online_course/src/root_app.dart';
+import 'package:online_course/src/features/onboarding/presentation/onboarding_screen.dart';
 import 'package:online_course/src/theme/theme.dart';
 
 void main() async {
@@ -53,6 +51,9 @@ void main() async {
     ),
   );
 
+  //for no screenshot
+  NoScreenshot.instance.screenshotOff();
+  
   runApp(const MyApp());
 }
 

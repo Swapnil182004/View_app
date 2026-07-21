@@ -35,7 +35,7 @@ class _ChatPageState extends State<ChatPage> {
         appBar: AppBar(
           toolbarHeight: 60, // Reduced height limits vertical space heavily
           leadingWidth: 40,  // Prevents leading from stretching AppBar past 30px
-          backgroundColor: const Color(0xFF145F29), // Premium deep green
+          backgroundColor: const Color(0xFF1E40AF), // Brand Blue
           foregroundColor: Colors.white,
           elevation: 0,
           automaticallyImplyLeading: false, // Turn off default back button to avoid its 48x48 min constraints
@@ -55,7 +55,7 @@ class _ChatPageState extends State<ChatPage> {
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [Color(0xFF145F29), Color(0xFF1A56DB)],
+                colors: [Color(0xFF1E40AF), Color(0xFF60A5FA)],
               ),
             ),
           ),
@@ -112,7 +112,7 @@ class _ChatPageState extends State<ChatPage> {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1A56DB), // Brand Green
+                    color: Color(0xFF1A56DB), // Brand Blue
                   ),
                 ),
               ),

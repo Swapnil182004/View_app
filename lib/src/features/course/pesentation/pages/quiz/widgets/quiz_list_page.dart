@@ -111,10 +111,12 @@ class _QuizListPageState extends State<QuizListPage> {
       appBar: AppBar(
         backgroundColor: _Clr.dark,
         foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
-        title: Text(widget.category.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17)),
+        title: Text(widget.category.name, style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 17, color: Colors.white)),
         actions: [
           IconButton(
+            color: Colors.white,
             icon: const Icon(Icons.refresh_rounded),
             onPressed: _loadQuizzes,
             tooltip: 'Refresh',

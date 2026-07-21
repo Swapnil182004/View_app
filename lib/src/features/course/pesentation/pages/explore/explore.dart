@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:online_course/src/features/course/pesentation/pages/explore/widgets/explore_appbar.dart';
-import 'package:online_course/src/features/course/pesentation/pages/explore/widgets/explore_category.dart';
 import 'package:online_course/src/features/course/pesentation/pages/explore/widgets/explore_course_list.dart';
 import 'package:online_course/src/features/course/pesentation/pages/explore/widgets/explore_search_block.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
@@ -33,6 +32,7 @@ class _ExplorePageState extends State<ExplorePage> {
           slivers: [
             SliverAppBar(
               backgroundColor: Colors.transparent,
+              iconTheme: const IconThemeData(color: Colors.white), // ✅ Back button white
               flexibleSpace: Container(
                 decoration: const BoxDecoration(
                   gradient: LinearGradient(
@@ -45,49 +45,28 @@ class _ExplorePageState extends State<ExplorePage> {
               pinned: true,
               snap: true,
               floating: true,
-              title: ExploreAppbar(),
+              title: const ExploreAppbar(),
             ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) => _buildBody(),
-                childCount: 1,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(left: 15, right: 15, top: 10),
+                child: ExploreSearchBlock(
+                  onSearch: (String s) {
+                    setState(() {
+                      searchTxt = s;
+                    });
+                  },
+                ),
               ),
-            )
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 15)),
+            ExploreCourseList(
+              searchText: searchTxt,
+              selectedCategory: selectedCategory,
+            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 20)),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildBody() {
-    return SingleChildScrollView(
-      physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ExploreSearchBlock(
-            onSearch: (String s) {
-              setState(() {
-                searchTxt = s;
-              });
-            },
-          ),
-          const SizedBox(height: 15),
-          ExploreCategory(
-            onCategorySelected: (String c) {
-              setState(() {
-                selectedCategory = c;
-              });
-            },
-          ),
-          const SizedBox(height: 15),
-          ExploreCourseList(
-            searchText: searchTxt,
-            selectedCategory: selectedCategory,
-          ),
-          const SizedBox(height: 20),
-        ],
       ),
     );
   }

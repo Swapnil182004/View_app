@@ -25,117 +25,141 @@ class ExploreCourseList extends StatefulWidget {
 }
 
 class _ExploreCourseListState extends State<ExploreCourseList> {
+  late Future<List<CourseModel>> _coursesFuture;
+
   @override
   void initState() {
     super.initState();
+    _coursesFuture = getCourses();
+  }
+
+  @override
+  void didUpdateWidget(covariant ExploreCourseList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.searchText != widget.searchText ||
+        oldWidget.selectedCategory != widget.selectedCategory) {
+      setState(() {
+        _coursesFuture = getCourses();
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: getCourses(),
+    return FutureBuilder<List<CourseModel>>(
+      future: _coursesFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CustomProgressIndicator();
+          return const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.only(top: 50),
+              child: CustomProgressIndicator(),
+            ),
+          );
         }
         if (snapshot.hasError) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.error_outline,
-                    size: 48,
-                    color: Color(0xFFE67E22), // ✅ Orange error
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Something went wrong',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A1A),
+          return SliverToBoxAdapter(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      size: 48,
+                      color: Color(0xFFE67E22), // ✅ Orange error
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    '${snapshot.error}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF757575),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'Something went wrong',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A1A),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    Text(
+                      '${snapshot.error}',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF757575),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
         }
 
         if (!snapshot.hasData || (snapshot.data as List).isEmpty) {
-          return Center(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.search_off,
-                    size: 64,
-                    color: const Color(0xFF757575).withOpacity(0.5),
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'No courses found',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF1A1A1A),
+          return SliverToBoxAdapter(
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.search_off,
+                      size: 64,
+                      color: const Color(0xFF757575).withOpacity(0.5),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Try adjusting your search or filters',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Color(0xFF757575),
+                    const SizedBox(height: 16),
+                    const Text(
+                      'No courses found',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF1A1A1A),
+                      ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Try adjusting your search or filters',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Color(0xFF757575),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           );
         }
 
         List<CourseModel> courses = snapshot.data as List<CourseModel>;
-        return _buildItemList(courses);
+        return _buildSliverList(courses);
       },
     );
   }
 
-  Widget _buildItemList(List<Course> courses) {
-    return ListView.builder(
+  Widget _buildSliverList(List<Course> courses) {
+    return SliverPadding(
       padding: const EdgeInsets.fromLTRB(15, 0, 15, 20),
-      physics: const NeverScrollableScrollPhysics(),
-      shrinkWrap: true,
-      itemCount: courses.length,
-      itemBuilder: (context, index) {
-        return CourseItem(
-          onTap: () {
-            AppNavigator.to(
-              context,
-              CourseDetailPage(
-                course: courses[index],
-                isHero: true, initialTab: 3,
-              ),
-            );
-          },
-          course: courses[index],
-          width: MediaQuery.of(context).size.width,
-        );
-      },
+      sliver: SliverList.builder(
+        itemCount: courses.length,
+        itemBuilder: (context, index) {
+          return CourseItem(
+            onTap: () {
+              AppNavigator.to(
+                context,
+                CourseDetailPage(
+                  course: courses[index],
+                  isHero: true,
+                  initialTab: 3,
+                ),
+              );
+            },
+            course: courses[index],
+            width: MediaQuery.of(context).size.width,
+          );
+        },
+      ),
     );
   }
 
@@ -181,11 +205,26 @@ class _ExploreCourseListState extends State<ExploreCourseList> {
 
       QuerySnapshot querySnapshot = await query.get();
 
+      String searchNormalized = widget.searchText.toLowerCase().trim().replaceAll(".", "");
+
       for (var courseDoc in querySnapshot.docs) {
         Map<String, dynamic> courseData =
             courseDoc.data() as Map<String, dynamic>;
         CourseModel courseModel = CourseModel.fromMap(courseData);
-        courseModels.add(courseModel);
+        
+        // Secondary Relevance Filter: 
+        // If searching, ensure the result actually contains the search term (case & dot insensitive)
+        if (searchNormalized.isNotEmpty) {
+          String nameNormalized = courseModel.name.toLowerCase().replaceAll(".", "");
+          String descNormalized = courseModel.description.toLowerCase().replaceAll(".", "");
+          
+          if (nameNormalized.contains(searchNormalized) || 
+              descNormalized.contains(searchNormalized)) {
+            courseModels.add(courseModel);
+          }
+        } else {
+          courseModels.add(courseModel);
+        }
       }
 
       return courseModels;

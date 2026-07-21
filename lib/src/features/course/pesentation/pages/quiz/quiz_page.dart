@@ -113,6 +113,7 @@ class _QuizMainPageState extends State<QuizMainPage> {
             pinned: true,
             backgroundColor: _Clr.dark,
             foregroundColor: Colors.white,
+            iconTheme: const IconThemeData(color: Colors.white),
             elevation: 0,
             actions: [
               IconButton(

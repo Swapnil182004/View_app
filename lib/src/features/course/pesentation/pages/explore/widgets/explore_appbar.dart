@@ -13,9 +13,9 @@ class ExploreAppbar extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: const [
               Text(
-                "Explore",
+                "Courses",
                 style: TextStyle(
-                  color: Colors.white, // ✅ White text on emerald header
+                  color: Colors.white,
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),

@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
+import 'package:online_course/core/services/payment_service.dart';
 
 // ─── DESIGN TOKENS ──────────────────────────────────────────────────────────
 
@@ -1813,55 +1814,52 @@ class PremiumPaymentBottomSheet extends StatefulWidget {
 }
 
 class _PremiumPaymentBottomSheetState extends State<PremiumPaymentBottomSheet> {
-  late Razorpay _razorpay;
+  final PaymentService _paymentService = PaymentService();
   bool _isProcessing = false;
 
   @override
   void initState() {
     super.initState();
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+    _paymentService.init(
+      onSuccess: _handlePaymentSuccess,
+      onFailure: _handlePaymentError,
+      onExternalWallet: _handleExternalWallet,
+    );
   }
 
   @override
-  void dispose() { _razorpay.clear(); super.dispose(); }
+  void dispose() {
+    _paymentService.dispose();
+    super.dispose();
+  }
 
   void openCheckout() async {
     setState(() => _isProcessing = true);
-    final orderId = await createRazorpayOrder(widget.price.toInt());
+    final orderId = await _paymentService.createOrder(widget.price.toInt());
+    
     if (orderId == null) {
       setState(() => _isProcessing = false);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Error: Unable to connect to payment gateway'),
-              backgroundColor: _Clr.orange));
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Error: Unable to connect to payment gateway'),
+            backgroundColor: _Clr.orange,
+          ),
+        );
+      }
       return;
     }
-    final options = {
-      'key': 'rzp_live_q05lvifSYOtDJ7',
-      'order_id': orderId,
-      'amount': (widget.price * 100).toInt(),
-      'name': 'Examplan B',
-      'image': 'assets/images/examplan_b_logo.png',
-      'description': widget.subjectName,
-      'theme': {'color': '#305CDE'},
-    };
-    try { _razorpay.open(options); } catch (e) { setState(() => _isProcessing = false); }
-  }
 
-  Future<String?> createRazorpayOrder(int amount) async {
     try {
-      final response = await http.post(
-        Uri.parse('https://createrazorpayorder-ebwzua76iq-uc.a.run.app'),
-        headers: {'Accept': '*/*', 'User-Agent': 'Flutter Client', 'Content-Type': 'application/json'},
-        body: json.encode({'amount': amount, 'currency': 'INR'}),
+      await _paymentService.openCheckout(
+        name: 'Examplan B',
+        description: widget.subjectName,
+        amount: widget.price.toInt(),
+        orderId: orderId,
       );
-      if (response.statusCode >= 200 && response.statusCode < 300) {
-        return json.decode(response.body)['order']['id'];
-      }
-    } catch (_) {}
-    return null;
+    } catch (e) {
+      setState(() => _isProcessing = false);
+    }
   }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) async {

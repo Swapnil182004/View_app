@@ -6,7 +6,7 @@ import 'package:online_course/src/features/course/domain/entities/course.dart';
 import 'package:online_course/src/features/course/pesentation/pages/course_detail/widgets/course_detail_bottom_block.dart';
 import 'package:online_course/src/features/course/pesentation/pages/course_detail/widgets/course_detail_image.dart';
 import 'package:online_course/src/features/course/pesentation/pages/course_detail/widgets/course_detail_info.dart';
-import 'package:online_course/src/features/course/pesentation/pages/course_detail/widgets/course_detail_tabbar.dart';
+import 'package:online_course/src/features/course/pesentation/pages/course_detail/widgets/section_card.dart';
 import 'package:online_course/src/widgets/custom_appbar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -207,14 +207,44 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
               },
             ),
           
+          // Section Header - Always shown
+          Padding(
+            padding: const EdgeInsets.only(top: 8, bottom: 12),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8ECF9),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.list_alt_rounded,
+                    color: Color(0xFF1A56DB),
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                const Text(
+                  'Course Content',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1A1A1A),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
           // Divider
           Divider(
             color: const Color(0xFFE0E0E0),
             thickness: 1,
-            height: 30,
+            height: 20,
           ),
           
-          // Lessons & Exercises TabBar
+          // Section Cards - Always shown
           FutureBuilder(
             future: fetchSectionData(),
             builder: (context, snapshot) {
@@ -223,7 +253,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   child: Padding(
                     padding: EdgeInsets.all(40),
                     child: CircularProgressIndicator(
-                      color: Color(0xFF1D4ED8), // 🔵 Standard Blue
+                      color: Color(0xFF1D4ED8),
                     ),
                   ),
                 );
@@ -237,7 +267,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                         Icon(
                           Icons.error_outline,
                           size: 48,
-                          color: Color(0xFFE67E22), // ✅ Orange error
+                          color: Color(0xFFE67E22),
                         ),
                         SizedBox(height: 12),
                         Text(
@@ -253,19 +283,26 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 );
               }
               if (snapshot.hasData) {
-                return CourseDetailTabBar(
-                  courseId: course.id,
-                  isPurchased: widget.isPurchased,
-                  sections: sections,
-                  purchaseType: widget.purchasedType,
-                  sectionList: snapshot.data as List<Section>,
-                  purchasedSections: widget.purchasedSections,
-                  sectionPurchaseDate: widget.sectionPurchaseDate,
+                List<Section> sectionList = snapshot.data as List<Section>;
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: sectionList.length,
+                  itemBuilder: (context, index) {
+                    final section = sectionList[index];
+                    
+                    return SectionCard(
+                      section: section,
+                      courseId: course.id,
+                    );
+                  },
                 );
               }
               return const SizedBox.shrink();
             },
           ),
+          
+          const SizedBox(height: 20),
         ],
       ),
     );
