@@ -48,6 +48,7 @@ class HomeCategory extends StatelessWidget {
         AppNavigator.to(context,  QuizMainPage());
         break;
       case "MY COURSE":
+      case "MY COURSES":
         AppNavigator.to(context, const MyCoursePage());
         break;
       case "EXPLORE":

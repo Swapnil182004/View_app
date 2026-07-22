@@ -21,7 +21,8 @@ class _SectionTabLessonsState extends State<SectionTabLessons> {
   List<Map<String, dynamic>> _folders = [];
   Map<String, List<Map<String, dynamic>>> _folderLessons = {};
   bool _isLoading = true;
-  bool _isExpanded = true;
+  // Track expanded folder ids
+  final Set<String> _expandedFolderIds = {};
 
   @override
   void initState() {
@@ -46,36 +47,38 @@ class _SectionTabLessonsState extends State<SectionTabLessons> {
         folders.add(data);
       }
 
-      // Step 2: Fetch lessons for this course + section
+      // Step 2: Fetch video lessons for this course + section (collection: lesson_videos)
       QuerySnapshot lessonSnapshot = await FirebaseFirestore.instance
-          .collection('lessons')
+          .collection('lesson_videos')
           .where('courseId', isEqualTo: widget.courseId)
           .where('sectionId', isEqualTo: widget.sectionId)
           .get();
 
       List<Map<String, dynamic>> allLessons = [];
       for (var doc in lessonSnapshot.docs) {
-        allLessons.add(doc.data() as Map<String, dynamic>);
+        var data = doc.data() as Map<String, dynamic>;
+        data['docId'] = doc.id;
+        allLessons.add(data);
       }
 
-      // Step 3: Group lessons by folder name
+      // Step 3: Group lessons by folderId (if no folders, put in 'all')
       Map<String, List<Map<String, dynamic>>> folderMap = {};
-      
-      // If no folders exist, put all lessons under "All Lessons"
-      if (folders.isEmpty && allLessons.isNotEmpty) {
-        folderMap['All Lessons'] = allLessons;
+
+      if (folders.isEmpty) {
+        folderMap['all'] = allLessons;
       } else {
-        // Put lessons in their respective folders
         for (var folder in folders) {
-          final folderName = folder['name'] as String? ?? 'Folder';
-          // Match lessons: if lesson has no direct folder field, show all under each folder
-          folderMap[folderName] = allLessons;
-          break; // Show all lessons once since lessons don't have a folder field directly
+          final folderId = folder['docId'] as String;
+          folderMap[folderId] = [];
         }
-        // If folder exists but no entries yet
-        if (folderMap.isEmpty) {
-          for (var folder in folders) {
-            folderMap[folder['name'] as String? ?? 'Folder'] = allLessons;
+
+        for (var lesson in allLessons) {
+          final folderId = (lesson['folderId'] ?? lesson['folder_id'] ?? lesson['folder']) as String?;
+          if (folderId != null && folderMap.containsKey(folderId)) {
+            folderMap[folderId]!.add(lesson);
+          } else {
+            // put unassigned lessons under 'all'
+            folderMap.putIfAbsent('all', () => []).add(lesson);
           }
         }
       }
@@ -102,26 +105,28 @@ class _SectionTabLessonsState extends State<SectionTabLessons> {
       );
     }
 
-    if (_folders.isEmpty && _folderLessons.isEmpty) {
+    if ((_folders.isEmpty || _folderLessons.isEmpty) && _folderLessons['all'] == null) {
       return _buildEmptyState();
     }
 
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        if (_folders.isEmpty && _folderLessons.isNotEmpty)
-          ..._buildLessonItems(_folderLessons.values.first)
+        // If there are no explicit folders, show all lessons as cards
+        if (_folders.isEmpty && (_folderLessons['all'] ?? []).isNotEmpty)
+          ..._buildLessonItems(_folderLessons['all'] ?? [])
         else
           ..._folders.map((folder) {
             final folderName = folder['name'] as String? ?? 'Folder';
-            final lessons = _folderLessons[folderName] ?? [];
-            return _buildFolderCard(folderName, lessons, folder == _folders.first);
+            final folderId = folder['docId'] as String;
+            final lessons = _folderLessons[folderId] ?? [];
+            final isExpanded = _expandedFolderIds.contains(folderId) || (_expandedFolderIds.isEmpty && folder == _folders.first);
+            return _buildFolderCard(folderId, folderName, lessons, isExpanded);
           }),
       ],
     );
   }
-
-  Widget _buildFolderCard(String folderName, List<Map<String, dynamic>> lessons, bool defaultExpanded) {
+  Widget _buildFolderCard(String folderId, String folderName, List<Map<String, dynamic>> lessons, bool isExpanded) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -131,68 +136,69 @@ class _SectionTabLessonsState extends State<SectionTabLessons> {
       ),
       child: Column(
         children: [
-          // Folder Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F4FF),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1A56DB),
-                    borderRadius: BorderRadius.circular(8),
+          // Folder Header (tappable to expand/collapse)
+          InkWell(
+            onTap: () {
+              setState(() {
+                if (_expandedFolderIds.contains(folderId)) {
+                  _expandedFolderIds.remove(folderId);
+                } else {
+                  _expandedFolderIds.add(folderId);
+                }
+              });
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F4FF),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1A56DB),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.folder_rounded, color: Colors.white, size: 18),
                   ),
-                  child: const Icon(Icons.folder_rounded, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        folderName,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1A1A1A),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          folderName,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1A1A1A),
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${lessons.length} video${lessons.length != 1 ? 's' : ''}',
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
-                      ),
-                    ],
+                        Text(
+                          '${lessons.length} video${lessons.length != 1 ? 's' : ''}',
+                          style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF1A56DB),
-                    borderRadius: BorderRadius.circular(12),
+                  AnimatedRotation(
+                    duration: const Duration(milliseconds: 200),
+                    turns: _expandedFolderIds.contains(folderId) ? 0.5 : 0.0,
+                    child: const Icon(Icons.expand_more_rounded, color: Color(0xFF1A56DB)),
                   ),
-                  child: const Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(Icons.play_arrow_rounded, size: 14, color: Colors.white),
-                      SizedBox(width: 2),
-                      Text(
-                        'Play All',
-                        style: TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.w500),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
-          // Lesson items
-          ...lessons.map((lesson) => _buildLessonItem(lesson)),
+          // Expanded lessons list
+          if (_expandedFolderIds.contains(folderId))
+            ...lessons.map((lesson) => _buildLessonItem(lesson))
+          else if (folderId == 'all' && (lessons.isNotEmpty))
+            ...lessons.map((lesson) => _buildLessonItem(lesson)),
         ],
       ),
     );
@@ -203,10 +209,10 @@ class _SectionTabLessonsState extends State<SectionTabLessons> {
   }
 
   Widget _buildLessonItem(Map<String, dynamic> lesson) {
-    final name = lesson['name'] as String? ?? 'Untitled';
-    final duration = lesson['duration'] as String? ?? '';
-    final image = lesson['image'] as String? ?? '';
-    final videoUrl = lesson['video_url'] as String? ?? '';
+    final name = (lesson['name'] ?? lesson['title']) as String? ?? 'Untitled';
+    final duration = (lesson['duration'] ?? lesson['timing']) as String? ?? '';
+    final image = (lesson['image'] ?? lesson['thumbnail'] ?? lesson['thumbnail_url']) as String? ?? '';
+    final videoUrl = (lesson['video_url'] ?? lesson['videoUrl'] ?? lesson['video']) as String? ?? '';
 
     return InkWell(
       onTap: () {

@@ -10,18 +10,18 @@ final categories = [
     "tabIndex": 0,
   },
   // ✅ ADDED DASHBOARD HERE
-  {
-    "name": "DASHBOARD",
-    "icon": "assets/images/course.png", // 👈 Change this image path if you have a specific dashboard icon!
-    "tabIndex": 1,
-  },
+  // {
+  //   "name": "DASHBOARD",
+  //   "icon": "assets/images/course.png", // 👈 Change this image path if you have a specific dashboard icon!
+  //   "tabIndex": 1,
+  // },
   {
     "name": "SUBJECT",
     "icon": "assets/images/Subjects.png",
     "tabIndex": 2,
   },
   {
-    "name": "LIVE COURSE",
+    "name": "MY COURSES",
     "icon": "assets/images/course.png",
     "tabIndex": 3,
   },

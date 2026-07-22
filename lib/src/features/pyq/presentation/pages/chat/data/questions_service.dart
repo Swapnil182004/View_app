@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:online_course/core/services/fast_search_service.dart';
 
@@ -62,5 +63,26 @@ class FirestoreService {
         .collection('questions')
         .get();
     return snapshot.docs;
+  }
+
+  Future<List<String>> getPdfUrls(String examId, [String yearId = '']) async {
+    final storageRef = FirebaseStorage.instance
+        .ref()
+        .child('previous_year_questions/$examId${yearId.isNotEmpty ? "/$yearId" : ""}');
+
+    try {
+      final result = await storageRef.listAll();
+      final urls = <String>[];
+      for (final item in result.items) {
+        final url = await item.getDownloadURL();
+        urls.add(url);
+      }
+      return urls;
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error listing PDFs: $e');
+      }
+      return [];
+    }
   }
 }

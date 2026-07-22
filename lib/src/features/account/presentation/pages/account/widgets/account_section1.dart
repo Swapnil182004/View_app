@@ -40,7 +40,7 @@ class AccountBlock1 extends StatelessWidget {
             bgIconColor: const Color(0xFF1877F2), // Facebook Blue
             onTap: () {
               launchUrl(
-                  Uri.parse('https://www.facebook.com/share/14SnoXteSU8/'));
+                  Uri.parse('https://www.facebook.com/share/1BYggjRXLB/'));
             },
           ),
           Divider(height: 1, color: cs.outlineVariant),
@@ -49,7 +49,7 @@ class AccountBlock1 extends StatelessWidget {
             leadingIcon: "assets/icons/logo_ig.svg",
             bgIconColor: const Color(0xFFE4405F), // Instagram Pink
             onTap: () {
-              launchUrl(Uri.parse('https://www.instagram.com/view41674'));
+              launchUrl(Uri.parse('https://www.instagram.com/viewinstitute_?igsh=ZnVyem9wZmJzMGxj'));
             },
           ),
           Divider(height: 1, color: cs.outlineVariant),
@@ -58,12 +58,12 @@ class AccountBlock1 extends StatelessWidget {
             leadingIcon: "assets/icons/logo_telegram.svg",
             bgIconColor: const Color(0xFF0088CC), // Telegram Blue
             onTap: () {
-              launchUrl(Uri.parse('https://telegram.me/examplanbofficials'));
+              launchUrl(Uri.parse('https://t.me/+917364839389'));
             },
           ),
           Divider(height: 1, color: cs.outlineVariant),
           SettingItem(
-            title: "Channel",
+            title: "WhatsApp",
             leadingIcon: "assets/icons/locn_whatsapp.svg",
             bgIconColor: const Color(0xFF25D366), // WhatsApp Green
             onTap: () {

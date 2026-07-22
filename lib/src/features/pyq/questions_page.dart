@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:online_course/src/features/document_viewer/presentation/pdf_viewer.dart';
 
 import 'presentation/pages/chat/data/questions_service.dart';
 
@@ -114,14 +115,34 @@ class QuestionsPage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          questionTitle,
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                            color: cs.onSurface,
-                            height: 1.4,
-                          ),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                questionTitle,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: cs.onSurface,
+                                  height: 1.4,
+                                ),
+                              ),
+                            ),
+                            if ((data?['pdf_url'] as String? ?? '').isNotEmpty)
+                              IconButton(
+                                onPressed: () {
+                                  final pdfUrl = data?['pdf_url'] as String? ?? '';
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => PdfViewer(url: pdfUrl),
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFFE67E22)),
+                                tooltip: 'View PDF',
+                              ),
+                          ],
                         ),
                         if (marksStr.isNotEmpty) ...[
                           const SizedBox(height: 10),

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:online_course/src/features/document_viewer/presentation/pdf_viewer.dart';
 import 'presentation/pages/chat/data/questions_service.dart';
 import 'questions_page.dart';
 
@@ -130,6 +131,151 @@ class YearsPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
+
+            // PDFs Section
+            FutureBuilder<List<String>>(
+              future: _firestoreService.getPdfUrls(examId),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const SizedBox.shrink();
+                }
+
+                final pdfUrls = snapshot.data ?? [];
+                if (pdfUrls.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 4,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topCenter,
+                              end: Alignment.bottomCenter,
+                              colors: [
+                                colorScheme.primary,
+                                colorScheme.secondary,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          'Previous Year Papers',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: colorScheme.onSurface,
+                            letterSpacing: 0.3,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    ...pdfUrls.map((url) {
+                      final fileName = url.split('/').last;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                          border: Border.all(
+                            color: colorScheme.outlineVariant.withOpacity(0.3),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: colorScheme.primary.withOpacity(0.08),
+                              spreadRadius: 0,
+                              blurRadius: 12,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                          leading: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  colorScheme.secondary.withOpacity(0.1),
+                                  colorScheme.tertiary.withOpacity(0.1),
+                                ],
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: colorScheme.secondary.withOpacity(0.3),
+                                width: 1.5,
+                              ),
+                            ),
+                            child: const Icon(
+                              Icons.picture_as_pdf_rounded,
+                              color: Color(0xFFE67E22),
+                              size: 28,
+                            ),
+                          ),
+                          title: Text(
+                            fileName,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: colorScheme.onSurface,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          subtitle: const Padding(
+                            padding: EdgeInsets.only(top: 6),
+                            child: Text(
+                              'Tap to view PDF',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Color(0xFF9E9E9E),
+                              ),
+                            ),
+                          ),
+                          trailing: Container(
+                            width: 36,
+                            height: 36,
+                            decoration: BoxDecoration(
+                              color: colorScheme.primary.withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              color: Color(0xFF1A56DB),
+                              size: 16,
+                            ),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => PdfViewer(
+                                  url: url,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    }).toList(),
+                  ],
+                );
+              },
+            ),
 
             // Years Section Header
             Row(

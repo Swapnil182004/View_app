@@ -29,7 +29,7 @@ class AccountBlock2 extends StatelessWidget {
             leadingIcon: "assets/icons/discover.svg",
             bgIconColor: cs.primary, // ✅ VIEW Green/Purple
             onTap: () {
-              launchUrl(Uri.parse("http://viewinstitute.com/"));
+              launchUrl(Uri.parse("https://viewinstitutes.com/"));
             },
           ),
           Divider(height: 1, color: cs.outlineVariant),
