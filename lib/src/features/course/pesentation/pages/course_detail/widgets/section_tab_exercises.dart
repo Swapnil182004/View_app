@@ -21,6 +21,7 @@ class _SectionTabExercisesState extends State<SectionTabExercises> {
   List<Map<String, dynamic>> _folders = [];
   Map<String, List<Map<String, dynamic>>> _folderExercises = {};
   bool _isLoading = true;
+  final Set<String> _expandedFolderIds = {};
 
   @override
   void initState() {
@@ -40,31 +41,43 @@ class _SectionTabExercisesState extends State<SectionTabExercises> {
 
       List<Map<String, dynamic>> folders = [];
       for (var doc in folderSnapshot.docs) {
-        folders.add(doc.data() as Map<String, dynamic>);
+        var data = doc.data() as Map<String, dynamic>;
+        data['docId'] = doc.id;
+        folders.add(data);
       }
 
-      // Step 2: Fetch exercises for this section
+      // Step 2: Fetch exercise PDFs (collection: exercise_pdfs)
       QuerySnapshot exerciseSnapshot = await FirebaseFirestore.instance
-          .collection('exercises')
+          .collection('exercise_pdfs')
           .where('courseId', isEqualTo: widget.courseId)
           .where('sectionId', isEqualTo: widget.sectionId)
           .get();
 
       List<Map<String, dynamic>> allExercises = [];
       for (var doc in exerciseSnapshot.docs) {
-        allExercises.add(doc.data() as Map<String, dynamic>);
+        var data = doc.data() as Map<String, dynamic>;
+        data['docId'] = doc.id;
+        allExercises.add(data);
       }
 
-      // Group by folder
+      // Group by folder docId
       Map<String, List<Map<String, dynamic>>> folderMap = {};
-      
-      if (folders.isNotEmpty) {
+      if (folders.isEmpty) {
+        folderMap['all'] = allExercises;
+      } else {
         for (var folder in folders) {
-          final folderName = folder['name'] as String? ?? 'Exercises';
-          folderMap[folderName] = allExercises;
+          final folderId = folder['docId'] as String;
+          folderMap[folderId] = [];
         }
-      } else if (allExercises.isNotEmpty) {
-        folderMap['All Exercises'] = allExercises;
+
+        for (var ex in allExercises) {
+          final folderId = (ex['folderId'] ?? ex['folder_id'] ?? ex['folder']) as String?;
+          if (folderId != null && folderMap.containsKey(folderId)) {
+            folderMap[folderId]!.add(ex);
+          } else {
+            folderMap.putIfAbsent('all', () => []).add(ex);
+          }
+        }
       }
 
       setState(() {
@@ -89,19 +102,25 @@ class _SectionTabExercisesState extends State<SectionTabExercises> {
       );
     }
 
-    if (_folderExercises.isEmpty) {
+    if ((_folderExercises.isEmpty || _folderExercises.values.every((l) => l.isEmpty)) && (_folders.isEmpty)) {
       return _buildEmptyState();
     }
 
     return ListView(
       padding: const EdgeInsets.all(16),
-      children: _folderExercises.entries.map((entry) {
-        return _buildFolderCard(entry.key, entry.value);
-      }).toList(),
+      children: _folders.isEmpty
+          ? (_folderExercises['all'] ?? []).map((e) => _buildExerciseItem(e)).toList()
+          : _folders.map((folder) {
+              final folderName = folder['name'] as String? ?? 'Exercises';
+              final folderId = folder['docId'] as String;
+              final exercises = _folderExercises[folderId] ?? [];
+              final isExpanded = _expandedFolderIds.contains(folderId) || (_expandedFolderIds.isEmpty && folder == _folders.first);
+              return _buildFolderCard(folderId, folderName, exercises, isExpanded);
+            }).toList(),
     );
   }
 
-  Widget _buildFolderCard(String folderName, List<Map<String, dynamic>> exercises) {
+  Widget _buildFolderCard(String folderId, String folderName, List<Map<String, dynamic>> exercises, bool isExpanded) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -111,50 +130,65 @@ class _SectionTabExercisesState extends State<SectionTabExercises> {
       ),
       child: Column(
         children: [
-          // Folder Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-            decoration: BoxDecoration(
-              color: const Color(0xFFF0F4FF),
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF388E3C),
-                    borderRadius: BorderRadius.circular(8),
+          InkWell(
+            onTap: () {
+              setState(() {
+                if (_expandedFolderIds.contains(folderId)) {
+                  _expandedFolderIds.remove(folderId);
+                } else {
+                  _expandedFolderIds.add(folderId);
+                }
+              });
+            },
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF0F4FF),
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(11)),
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF388E3C),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(Icons.assignment_rounded, color: Colors.white, size: 18),
                   ),
-                  child: const Icon(Icons.assignment_rounded, color: Colors.white, size: 18),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        folderName,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF1A1A1A),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          folderName,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF1A1A1A),
+                          ),
                         ),
-                      ),
-                      Text(
-                        '${exercises.length} exercise${exercises.length != 1 ? 's' : ''}',
-                        style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
-                      ),
-                    ],
+                        Text(
+                          '${exercises.length} exercise${exercises.length != 1 ? 's' : ''}',
+                          style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                  AnimatedRotation(
+                    duration: const Duration(milliseconds: 200),
+                    turns: _expandedFolderIds.contains(folderId) ? 0.5 : 0.0,
+                    child: const Icon(Icons.expand_more_rounded, color: Color(0xFF388E3C)),
+                  ),
+                ],
+              ),
             ),
           ),
 
-          // Exercise items
-          ...exercises.map((exercise) => _buildExerciseItem(exercise)),
+          if (_expandedFolderIds.contains(folderId) || (isExpanded && _expandedFolderIds.isEmpty))
+            ...exercises.map((exercise) => _buildExerciseItem(exercise)),
         ],
       ),
     );
@@ -164,8 +198,8 @@ class _SectionTabExercisesState extends State<SectionTabExercises> {
     final name = exercise['name'] as String? ?? 'Untitled';
     final duration = exercise['duration'] as String? ?? '';
     final image = exercise['image'] as String? ?? '';
-    // exercises store PDF URLs in video_url field
-    final pdfUrl = exercise['video_url'] as String? ?? '';
+    // PDFs may be stored in 'pdfUrl' or 'pdf_url' or 'pdf'
+    final pdfUrl = (exercise['pdfUrl'] ?? exercise['pdf_url'] ?? exercise['pdf'] ?? exercise['pdfUrl'] ) as String? ?? '';
     final hasPdf = pdfUrl.isNotEmpty;
 
     return InkWell(

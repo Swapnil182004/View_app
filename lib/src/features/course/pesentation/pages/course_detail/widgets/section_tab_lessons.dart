@@ -228,62 +228,68 @@ class _SectionTabLessonsState extends State<SectionTabLessons> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        margin: const EdgeInsets.symmetric(vertical: 8),
         decoration: const BoxDecoration(
           border: Border(bottom: BorderSide(color: Color(0xFFF0F0F0), width: 0.5)),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 50,
-              height: 50,
-              decoration: BoxDecoration(
+            // Wide thumbnail with centered play button
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Container(
                 color: const Color(0xFFF0F4FF),
-                borderRadius: BorderRadius.circular(8),
-                image: image.isNotEmpty
-                    ? DecorationImage(
-                        image: NetworkImage(image),
-                        fit: BoxFit.cover,
-                      )
-                    : null,
+                width: double.infinity,
+                height: 160,
+                child: Stack(
+                  fit: StackFit.expand,
+                  alignment: Alignment.center,
+                  children: [
+                    if (image.isNotEmpty)
+                      Image.network(image, fit: BoxFit.cover)
+                    else
+                      Container(color: const Color(0xFFF0F4FF)),
+                    // dark overlay for contrast
+                    Container(color: Colors.black.withOpacity(image.isNotEmpty ? 0.15 : 0.04)),
+                    // Play button
+                    Container(
+                      padding: const EdgeInsets.all(2),
+                      decoration: BoxDecoration(
+                        // color: Colors.white.withOpacity(0.9),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(Icons.play_arrow_rounded, size: 60, color: Color.fromARGB(255, 245, 245, 247)),
+                    ),
+                  ],
+                ),
               ),
-              child: image.isEmpty
-                  ? const Icon(Icons.play_circle_fill_rounded, color: Color(0xFF1A56DB), size: 28)
-                  : null,
             ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            const SizedBox(height: 10),
+            // Title and duration row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Row(
                 children: [
-                  Text(
-                    name,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF1A1A1A),
+                  Expanded(
+                    child: Text(
+                      name,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF1A1A1A)),
                     ),
                   ),
                   if (duration.isNotEmpty)
-                    Padding(
-                      padding: const EdgeInsets.only(top: 4),
-                      child: Row(
-                        children: [
-                          const Icon(Icons.schedule_rounded, size: 12, color: Color(0xFF9E9E9E)),
-                          const SizedBox(width: 4),
-                          Text(
-                            duration,
-                            style: const TextStyle(fontSize: 12, color: Color(0xFF9E9E9E)),
-                          ),
-                        ],
-                      ),
+                    Row(
+                      children: [
+                        const Icon(Icons.schedule_rounded, size: 14, color: Color(0xFF9E9E9E)),
+                        const SizedBox(width: 6),
+                        Text(duration, style: const TextStyle(fontSize: 13, color: Color(0xFF9E9E9E), fontWeight: FontWeight.w600)),
+                      ],
                     ),
                 ],
               ),
             ),
-            const Icon(Icons.play_circle_fill_rounded, color: Color(0xFF1A56DB), size: 28),
           ],
         ),
       ),
