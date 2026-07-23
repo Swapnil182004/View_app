@@ -153,7 +153,8 @@ class _HomePageState extends State<HomePage> {
             SliverToBoxAdapter(
               child: _buildRecentNewsSection(context),
             ),
-            const SliverToBoxAdapter(child: SizedBox(height: 30)),
+            //bottom empty space
+            const SliverToBoxAdapter(child: SizedBox(height: 200)),
           ],
         ),
       ),

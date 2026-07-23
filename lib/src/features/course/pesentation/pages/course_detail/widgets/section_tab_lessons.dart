@@ -48,17 +48,42 @@ class _SectionTabLessonsState extends State<SectionTabLessons> {
       }
 
       // Step 2: Fetch video lessons for this course + section (collection: lesson_videos)
-      QuerySnapshot lessonSnapshot = await FirebaseFirestore.instance
-          .collection('lesson_videos')
-          .where('courseId', isEqualTo: widget.courseId)
-          .where('sectionId', isEqualTo: widget.sectionId)
-          .get();
+      // Try with ordering first; fall back to unordered if composite index is missing
+      QuerySnapshot lessonSnapshot;
+      try {
+        lessonSnapshot = await FirebaseFirestore.instance
+            .collection('lesson_videos')
+            .where('courseId', isEqualTo: widget.courseId)
+            .where('sectionId', isEqualTo: widget.sectionId)
+            .orderBy('createdAt', descending: false)
+            .get();
+      } catch (orderError) {
+        debugPrint('Ordered query failed (composite index may be missing), falling back: $orderError');
+        lessonSnapshot = await FirebaseFirestore.instance
+            .collection('lesson_videos')
+            .where('courseId', isEqualTo: widget.courseId)
+            .where('sectionId', isEqualTo: widget.sectionId)
+            .get();
+      }
 
       List<Map<String, dynamic>> allLessons = [];
       for (var doc in lessonSnapshot.docs) {
         var data = doc.data() as Map<String, dynamic>;
         data['docId'] = doc.id;
         allLessons.add(data);
+      }
+
+      // If we got lessons without ordering, sort them in memory by createdAt
+      // This ensures even without a composite index, lessons appear in correct order
+      if (allLessons.isNotEmpty && allLessons.first.containsKey('createdAt')) {
+        allLessons.sort((a, b) {
+          final aCreatedAt = a['createdAt'];
+          final bCreatedAt = b['createdAt'];
+          if (aCreatedAt is Timestamp && bCreatedAt is Timestamp) {
+            return aCreatedAt.compareTo(bCreatedAt);
+          }
+          return 0;
+        });
       }
 
       // Step 3: Group lessons by folderId (if no folders, put in 'all')
