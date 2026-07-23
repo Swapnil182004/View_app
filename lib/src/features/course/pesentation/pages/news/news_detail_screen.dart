@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart'; // Add to pubspec.yaml
 import 'package:url_launcher/url_launcher.dart';
 import 'package:online_course/src/features/course/data/models/news_model.dart';
+import 'package:online_course/src/features/document_viewer/presentation/pdf_viewer.dart';
 
 class NewsDetailScreen extends StatelessWidget {
   final NewsModel news;
@@ -120,39 +121,41 @@ class NewsDetailScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Description (Short Summary)
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFFF9E6),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFF2563EB).withOpacity(0.3),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.info_outline,
-                          color: Colors.grey[700],
-                          size: 20,
+                  // Description (Short Summary) — only if non-empty
+                  if (news.hasDescription) ...[
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFF9E6),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFF2563EB).withOpacity(0.3),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            news.description,
-                            style: TextStyle(
-                              fontSize: 15,
-                              color: Colors.grey[800],
-                              height: 1.5,
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Icon(
+                            Icons.info_outline,
+                            color: Colors.grey[700],
+                            size: 20,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              news.description,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.grey[800],
+                                height: 1.5,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 24),
+                    const SizedBox(height: 24),
+                  ],
 
                   // Divider
                   Divider(
@@ -186,18 +189,18 @@ class NewsDetailScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                   ],
 
-                  // External Article Link Button
-                  if (news.newsLink != null && news.newsLink!.isNotEmpty) ...[
+                  // PDF Read More Button (shown before external link)
+                  if (news.hasPdf) ...[
                     Container(
                       width: double.infinity,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Color(0xFF1E40AF), Color(0xFF60A5FA)],
+                          colors: [Color(0xFF9333EA), Color(0xFFA855F7)],
                         ),
                         borderRadius: BorderRadius.circular(12),
                         boxShadow: [
                           BoxShadow(
-                            color: const Color(0xFF1D4ED8).withOpacity(0.3),
+                            color: const Color(0xFF9333EA).withOpacity(0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 4),
                           ),
@@ -207,23 +210,13 @@ class NewsDetailScreen extends StatelessWidget {
                         color: Colors.transparent,
                         child: InkWell(
                           borderRadius: BorderRadius.circular(12),
-                          onTap: () async {
-                            final url = Uri.parse(news.newsLink!);
-                            if (await canLaunchUrl(url)) {
-                              await launchUrl(
-                                url,
-                                mode: LaunchMode.externalApplication,
-                              );
-                            } else {
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('Could not open the link'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              }
-                            }
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => PdfViewer(url: news.pdfUrl!),
+                              ),
+                            );
                           },
                           child: Padding(
                             padding: const EdgeInsets.symmetric(
@@ -234,13 +227,13 @@ class NewsDetailScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: const [
                                 Icon(
-                                  Icons.open_in_new,
+                                  Icons.picture_as_pdf,
                                   color: Colors.white,
                                   size: 22,
                                 ),
                                 SizedBox(width: 12),
                                 Text(
-                                  'Read Full Article',
+                                  'Read More',
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
@@ -253,7 +246,62 @@ class NewsDetailScreen extends StatelessWidget {
                         ),
                       ),
                     ),
-                  ] else ...[
+                    const SizedBox(height: 16),
+                  ],
+
+                  // External Article Link (shown as clickable link)
+                  if (news.hasNewsLink) ...[
+                    Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[100],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: InkWell(
+                        onTap: () async {
+                          final url = Uri.parse(news.newsLink!);
+                          if (await canLaunchUrl(url)) {
+                            await launchUrl(
+                              url,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } else {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Could not open the link'),
+                                  backgroundColor: Colors.red,
+                                ),
+                              );
+                            }
+                          }
+                        },
+                        child: Row(
+                          children: [
+                            const Icon(
+                              Icons.open_in_new,
+                              color: Color(0xFF1E40AF),
+                              size: 18,
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: Text(
+                                news.newsLink!,
+                                style: const TextStyle(
+                                  color: Color(0xFF1E40AF),
+                                  fontSize: 13,
+                                  decoration: TextDecoration.underline,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ] else if (!news.hasPdf) ...[
+                    // Only show "no external link" if there's neither PDF nor link
                     Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
@@ -265,7 +313,7 @@ class NewsDetailScreen extends StatelessWidget {
                           Icon(Icons.info_outline, color: Colors.grey[600]),
                           const SizedBox(width: 12),
                           Text(
-                            'No external link available',
+                            'No additional resources available',
                             style: TextStyle(color: Colors.grey[600]),
                           ),
                         ],

@@ -187,7 +187,7 @@ class _HomePageState extends State<HomePage> {
 
         // Horizontal news cards from existing NewsService
         SizedBox(
-          height: 220,
+          height: 280,
           child: StreamBuilder<List<NewsModel>>(
             stream: _newsService.getNewsStream(),
             builder: (context, snapshot) {
@@ -257,13 +257,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   // ──────────────────────────────────────────────────
-  // ✅ INDIVIDUAL NEWS CARD — Text-only, professional
+  // ✅ INDIVIDUAL NEWS CARD — Modern UI with optional image
   // ──────────────────────────────────────────────────
   Widget _buildNewsCard(
     BuildContext context, {
     required NewsModel news,
   }) {
     final catInfo = news.categoryInfo;
+    final hasImage = news.imageUrl != null && news.imageUrl!.isNotEmpty;
 
     return GestureDetector(
       onTap: () {
@@ -275,7 +276,7 @@ class _HomePageState extends State<HomePage> {
         );
       },
       child: Container(
-        width: 220,
+        width: 240,
         margin: const EdgeInsets.only(right: 14),
         decoration: BoxDecoration(
           color: Colors.white,
@@ -288,57 +289,118 @@ class _HomePageState extends State<HomePage> {
             ),
           ],
         ),
-        child: Row(
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ Colored accent bar on left
-            Container(
-              width: 5,
-              decoration: BoxDecoration(
-                color: catInfo.color,
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(16),
-                  bottomLeft: Radius.circular(16),
-                ),
-              ),
-            ),
-            // ✅ Text content — no images
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Category badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            // ── Image (if available) ──
+            if (hasImage)
+              Stack(
+                children: [
+                  Image.network(
+                    news.imageUrl!,
+                    width: double.infinity,
+                    height: 130,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) =>
+                        Container(height: 130, color: Colors.grey[200]),
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Container(
+                        height: 130,
+                        color: Colors.grey[200],
+                        child: const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                      );
+                    },
+                  ),
+                  // Gradient overlay
+                  Positioned(
+                    bottom: 0, left: 0, right: 0,
+                    child: Container(
+                      height: 50,
                       decoration: BoxDecoration(
-                        color: catInfo.color.withOpacity(0.1),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.black.withOpacity(0.5)],
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Category badge on image
+                  Positioned(
+                    top: 10, left: 10,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: catInfo.color,
                         borderRadius: BorderRadius.circular(6),
                       ),
                       child: Text(
                         catInfo.label,
-                        style: TextStyle(
+                        style: const TextStyle(
+                          color: Colors.white,
                           fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          color: catInfo.color,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10),
-                    // Headline
-                    Expanded(
-                      child: Text(
-                        news.title,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w700,
-                          color: Color(0xFF1A1A1A),
-                          height: 1.35,
+                  ),
+                ],
+              ),
+
+            // ── Text content ──
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Category badge (if no image)
+                    if (!hasImage)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: catInfo.color.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(6),
                         ),
-                        maxLines: 3,
+                        child: Text(
+                          catInfo.label,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: catInfo.color,
+                          ),
+                        ),
+                      ),
+                    if (!hasImage) const SizedBox(height: 8),
+                    // Headline
+                    Text(
+                      news.title,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF1A1A1A),
+                        height: 1.35,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    // Description in small font (if non-empty)
+                    if (news.hasDescription)
+                      Text(
+                        news.description,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.grey[600],
+                          height: 1.3,
+                        ),
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ),
                     const SizedBox(height: 8),
                     // Date
                     Row(

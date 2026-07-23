@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:online_course/src/features/account/presentation/pages/privacy_policy_screen.dart';
+import 'package:online_course/src/features/account/presentation/pages/return_refund_screen.dart';
 import 'package:online_course/src/features/account/presentation/pages/account/widgets/setting_item.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -38,17 +40,26 @@ class AccountBlock2 extends StatelessWidget {
             leadingIcon: "assets/icons/shield.svg",
             bgIconColor: cs.secondary, // ✅ VIEW Cyan
             onTap: () {
-              launchUrl(Uri.parse("http://viewinstitute.com/privacy"));
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const PrivacyPolicyScreen(),
+                ),
+              );
             },
           ),
           Divider(height: 1, color: cs.outlineVariant),
           SettingItem(
-            title: "Return and refund",
+            title: "Return and Refund",
             leadingIcon: "assets/icons/bell.svg",
             bgIconColor: const Color(0xFFE67E22), // Orange
             onTap: () {
-              launchUrl(Uri.parse(
-                  "http://viewinstitute.com/privacy")); // Pointing to privacy as per user request for domain update
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => const ReturnRefundScreen(),
+                ),
+              );
             },
           ),
         ],

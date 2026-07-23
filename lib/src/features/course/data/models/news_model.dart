@@ -13,6 +13,7 @@ class NewsModel {
   final DateTime createdAt;
   final int priority;
   final String? newsLink; // External news URL
+  final String? pdfUrl;   // Optional PDF URL from Firebase Storage
 
   NewsModel({
     required this.id,
@@ -26,6 +27,7 @@ class NewsModel {
     required this.createdAt,
     this.priority = 999,
     this.newsLink,
+    this.pdfUrl,
   });
 
   // Factory constructor to create NewsModel from Firestore document
@@ -62,6 +64,7 @@ class NewsModel {
       createdAt: parsedCreatedAt,
       priority: data['priority'] ?? 999,
       newsLink: data['newsLink'],
+      pdfUrl: data['pdfUrl'],
     );
   }
 
@@ -78,8 +81,18 @@ class NewsModel {
       'createdAt': Timestamp.fromDate(createdAt),
       'priority': priority,
       'newsLink': newsLink,
+      'pdfUrl': pdfUrl,
     };
   }
+
+  /// Check if this news has a downloadable PDF
+  bool get hasPdf => pdfUrl != null && pdfUrl!.isNotEmpty;
+
+  /// Check if description is non-empty (for conditional UI)
+  bool get hasDescription => description.isNotEmpty && description != '""';
+
+  /// Check if this has a newsLink (external article URL)
+  bool get hasNewsLink => newsLink != null && newsLink!.isNotEmpty;
 
   // Helper method to format date for display
   String get formattedDate {
@@ -118,5 +131,3 @@ class CategoryInfo {
 
   CategoryInfo(this.label, this.color);
 }
-
-
